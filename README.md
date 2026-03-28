@@ -92,11 +92,9 @@ npm install
 npm run dev
 ```
 
-Open in browser:
-
-```id="dqf5l3"
-http://localhost:5173
-```
+🌐 Local Development URLs
+Frontend → http://localhost:5173
+Backend → http://localhost:3000
 
 ---
 
@@ -109,3 +107,8 @@ This project demonstrates a complete job portal system with authentication, job 
 ## 👨‍💻 Developed by
 
 Yash Mehra
+
+
+⭐ Support
+
+If you like this project, give it a ⭐ on GitHub and share it!
