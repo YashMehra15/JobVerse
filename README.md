@@ -98,6 +98,10 @@ npm run dev
 
 ---
 
+
+## 🚀 Live Demo
+(https://jobverse-jsjo.onrender.com)
+
 ## 🎯 Purpose
 
 This project demonstrates a complete job portal system with authentication, job management, and real-world backend integration.
