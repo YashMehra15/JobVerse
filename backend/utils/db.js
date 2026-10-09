@@ -2,7 +2,12 @@ import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 
 dotenv.config();
-
+if (isRemoteDatabase) {
+    console.log(
+        'Aiven CA certificate configured:',
+        Boolean(process.env.DB_CA_CERT?.trim())
+    );
+}
 const isRemoteDatabase =
     Boolean(process.env.DB_HOST) &&
     process.env.DB_HOST !== 'localhost' &&
@@ -15,13 +20,15 @@ const pool = mysql.createPool({
     password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'jobverse',
 
-    // Aiven requires SSL for remote MySQL connections.
-    // Certificate verification remains enabled.
-    ssl: isRemoteDatabase
-        ? {
-              rejectUnauthorized: true,
-          }
-        : undefined,
+   // Secure SSL connection for remote MySQL databases.
+ssl: isRemoteDatabase
+    ? {
+          ca: process.env.DB_CA_CERT
+              ? process.env.DB_CA_CERT.replace(/\\n/g, '\n')
+              : undefined,
+          rejectUnauthorized: true,
+      }
+    : undefined,
 
     waitForConnections: true,
     connectionLimit: 5,
