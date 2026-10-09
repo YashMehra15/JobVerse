@@ -100,7 +100,7 @@ npm run dev
 
 
 ## 🚀 Live Demo
-(https://jobverse-jsjo.onrender.com)
+https://jobverse-jsjo.onrender.com
 
 ## 🎯 Purpose
 
