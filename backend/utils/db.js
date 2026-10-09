@@ -2,16 +2,19 @@ import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 
 dotenv.config();
+
+const isRemoteDatabase =
+    Boolean(process.env.DB_HOST) &&
+    process.env.DB_HOST !== 'localhost' &&
+    process.env.DB_HOST !== '127.0.0.1';
+
+// Diagnostic: check whether the CA certificate is configured.
 if (isRemoteDatabase) {
     console.log(
         'Aiven CA certificate configured:',
         Boolean(process.env.DB_CA_CERT?.trim())
     );
 }
-const isRemoteDatabase =
-    Boolean(process.env.DB_HOST) &&
-    process.env.DB_HOST !== 'localhost' &&
-    process.env.DB_HOST !== '127.0.0.1';
 
 const pool = mysql.createPool({
     host: process.env.DB_HOST || 'localhost',
