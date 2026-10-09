@@ -1,4 +1,5 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import useGetUserProfile from './hooks/useGetUserProfile'
 
 // ── Job Seeker Portal
 import Home from './components/Home'
@@ -64,6 +65,7 @@ const appRouter = createBrowserRouter([
 ])
 
 function App() {
+  useGetUserProfile()   // Restores user session from cookie on every page load
   return <RouterProvider router={appRouter} />
 }
 

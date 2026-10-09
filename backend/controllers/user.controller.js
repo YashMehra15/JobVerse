@@ -52,17 +52,32 @@ export const login = async (req, res) => {
 
         const [rows] = await pool.execute("SELECT * FROM users WHERE email = ?", [email]);
         if (rows.length === 0) {
-            return res.status(400).json({ message: "Incorrect email or password.", success: false });
+            console.error("Login failed: no account found for email:", email);
+            return res.status(400).json({ message: "No account found with this email. Please register first.", success: false });
         }
 
         const user = rows[0];
-        const isPasswordMatch = await bcrypt.compare(password, user.password);
+
+        // toString() ensures mysql2 Buffer fields are handled correctly
+        const storedHash = user.password ? user.password.toString() : "";
+        console.log("DEBUG login attempt:", {
+            email,
+            role,
+            passwordReceived: !!password,
+            passwordLength: password?.length,
+            storedHashPrefix: storedHash.substring(0, 7),
+            storedHashLength: storedHash.length,
+            isValidBcryptHash: storedHash.startsWith("$2b$") || storedHash.startsWith("$2a$")
+        });
+        const isPasswordMatch = await bcrypt.compare(password.trim(), storedHash);
+
         if (!isPasswordMatch) {
+            console.error("Password mismatch for:", email);
             return res.status(400).json({ message: "Incorrect email or password.", success: false });
         }
 
         if (role !== user.role) {
-            return res.status(400).json({ message: "Account doesn't exist with current role.", success: false });
+            return res.status(400).json({ message: `Account doesn't exist with current role. You registered as '${user.role}'.`, success: false });
         }
 
         const token = jwt.sign({ userId: user.id }, process.env.SECRET_KEY, { expiresIn: '1d' });
@@ -159,6 +174,35 @@ export const updateProfile = async (req, res) => {
         return res.status(200).json({ message: "Profile updated successfully.", user: userData, success: true });
     } catch (error) {
         console.error("UpdateProfile error:", error);
+        return res.status(500).json({ message: "Server error: " + error.message, success: false });
+    }
+};
+
+export const getProfile = async (req, res) => {
+    try {
+        const userId = req.id;
+        const [rows] = await pool.execute("SELECT * FROM users WHERE id = ?", [userId]);
+        if (rows.length === 0) {
+            return res.status(404).json({ message: "User not found.", success: false });
+        }
+        const user = rows[0];
+        const userData = {
+            _id: user.id,
+            fullname: user.fullname,
+            email: user.email,
+            phoneNumber: user.phone_number,
+            role: user.role,
+            profile: {
+                bio: user.bio,
+                skills: user.skills ? user.skills.split(",") : [],
+                resume: user.resume_url,
+                resumeOriginalName: user.resume_original_name,
+                profilePhoto: user.profile_photo
+            }
+        };
+        return res.status(200).json({ user: userData, success: true });
+    } catch (error) {
+        console.error("GetProfile error:", error);
         return res.status(500).json({ message: "Server error: " + error.message, success: false });
     }
 };
